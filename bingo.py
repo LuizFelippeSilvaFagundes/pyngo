@@ -206,14 +206,19 @@ class ShowTimeMenu(Menu):
 	def __init__(self, game):
 		Menu.__init__(self,game,SCREEN_RES[0]/2, title="TIEMPO DE BOLA")
 
-		for i in (1,2,3,4,5,6):
-			if getConfigInt('game','ball_showtime',BALL_SHOWTIME) == i * 1000:
-				self.addOption("[ " + str(i) + " segundos ]",self.setDelay(i*1000))
-			else:
-				self.addOption(str(i) + " segundos",self.setDelay(i*1000))
+		for i in (1,2,3,4,5):
+			if (DELAY_NEXTBALL >= i * 1000):
+				if getConfigInt('game','ball_showtime',BALL_SHOWTIME) == i * 1000:
+					self.addOption("[ " + str(i) + " segundos ]",self.setDelay(i*1000))
+				else:
+					self.addOption(str(i) + " segundos",self.setDelay(i*1000))
+		if getConfigInt('game','ball_showtime',BALL_SHOWTIME) == 0:
+			self.addOption("[ Hasta la siguiente ]",self.setDelay(0))
+		else:
+			self.addOption("Hasta la siguiente",self.setDelay(0))
 		self.addOption("Volver",self.back)
 		self.game.addPainter(self)
-		self.game.addEventListener(self)				
+		self.game.addEventListener(self)
 
 		r = self.getRect()
 		r.centerx, r.top=SCREEN_RES[0]/2 , 175
@@ -231,7 +236,7 @@ class ShowTimeMenu(Menu):
 		BALL_SHOWTIME = value
 		setConfig('game','ball_showtime',str(value))
 		self.game.removeObject(self)
-		ShowTimeMenu(self.game)
+		OptionsMenu(game)
 
 class DelayMenu(Menu):
 	
@@ -242,14 +247,14 @@ class DelayMenu(Menu):
 			self.addOption("[ Manual ]",self.setDelay(0))
 		else:
 			self.addOption("Manual",self.setDelay(0))
-		for i in (2,3,4,5,7,10):
+		for i in (1,2,3,4,5):
 			if getConfigInt('game','ball_delay',DELAY_NEXTBALL) == i * 1000:
 				self.addOption("[ " + str(i) + " segundos ]",self.setDelay(i*1000))
 			else:
 				self.addOption(str(i) + " segundos",self.setDelay(i*1000))
 		self.addOption("Volver",self.back)
 		self.game.addPainter(self)
-		self.game.addEventListener(self)				
+		self.game.addEventListener(self)
 
 		r = self.getRect()
 		r.centerx, r.top=SCREEN_RES[0]/2 , 175
@@ -263,11 +268,17 @@ class DelayMenu(Menu):
 		return lambda: self.setDelayReal(value)
 
 	def setDelayReal(self,value):
-		global DELAY_NEXTBALL		
+		global DELAY_NEXTBALL
+		global BALL_SHOWTIME
 		DELAY_NEXTBALL = value
-		setConfig('game','ball_delay',str(value))
+		if BALL_SHOWTIME <= 0 or BALL_SHOWTIME > DELAY_NEXTBALL:
+			BALL_SHOWTIME = DELAY_NEXTBALL
+		if BALL_SHOWTIME < 0:
+			BALL_SHOWTIME = 0
+		setConfig('game','ball_delay',str(DELAY_NEXTBALL))
+		setConfig('game','ball_showtime',str(BALL_SHOWTIME))
 		self.game.removeObject(self)
-		DelayMenu(self.game)
+		OptionsMenu(game)
 
 class OptionsMenu(Menu):
 	
@@ -275,14 +286,15 @@ class OptionsMenu(Menu):
 		Menu.__init__(self,game,SCREEN_RES[0]/2, title="OPCIONES")
 
 		self.addOption("Tiempo entre bolas",self.setDelay)
-		self.addOption("Tiempo de bola",self.setShowTime)		
+		if DELAY_NEXTBALL != 0:
+			self.addOption("Tiempo de bola",self.setShowTime)
 		self.addOption("Pantalla Completa",self.toggleFullScreen)
 		self.addOption("Volver",self.mainmenu)
 		self.game.addPainter(self)
 		self.game.addEventListener(self)				
 
 		r = self.getRect()
-		r.centerx, r.centery=SCREEN_RES[0]/2 , SCREEN_RES[1]/2
+		r.centerx, r.top=SCREEN_RES[0]/2 , 175
 		self.setRect(r)
 	
 	def setDelay(self):
@@ -363,7 +375,7 @@ class BallPainter(GameObject):
 			surface.blit(self.surface_curr,self.rect_curr)			
 		
 	def seen(self):
-		self.state = BallPainter.CURRENT		
+		self.state = BallPainter.CURRENT
 		
 		self.setDepth(self.depth - 1)
 		
@@ -372,9 +384,14 @@ class BallPainter(GameObject):
 		self.rect_curr.top, self.rect_curr.left = 150 + BALL_MARGIN, BALL_MARGIN 
 		self.surface_curr.set_alpha(255)
 		self.ticks = pygame.time.get_ticks()
+
+	def move(self):
+		if self.state == BallPainter.CURRENT:
+			self.state = BallPainter.MOVING
+			self.move_step = 0
 		
 	def update(self):
-		if self.state == BallPainter.CURRENT:
+		if BALL_SHOWTIME > 0 and self.state == BallPainter.CURRENT:
 			if pygame.time.get_ticks() - self.ticks > BALL_SHOWTIME:
 				self.state = BallPainter.MOVING
 				self.move_step = 0
@@ -458,14 +475,11 @@ class BingoRound(GameObject):
 		elif event.type == KEYDOWN and event.key == K_SPACE:
 			game.setState(STATE_PAUSED)
 			PauseMenu(game)
-		elif event.type == KEYDOWN and event.key == K_RETURN:
-			pygame.time.set_timer(EVENT_BALL,0)
-			pygame.event.post(pygame.event.Event(EVENT_BALL))			
 		elif event.type == EVENT_BALL:
-
 			ball = self.round.ball()
+			if self.last_ball: self.ball_painters[self.last_ball-1].move()
 			self.last_ball = ball
-			
+
 			if not ball:
 				pygame.time.set_timer(EVENT_BALL,0)
 				game.setState(STATE_FINISHED)
