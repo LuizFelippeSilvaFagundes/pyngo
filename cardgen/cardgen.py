@@ -138,8 +138,13 @@ now = datetime.now()
 filename = "cards_" + now.strftime("%Y%m%d%H%M%S") + ".csv"
 print filename;
 f = open(filename, "w")
+f.write("NUM_CARTON\t")
+for i in range(9):
+    for j in range(3):
+        f.write("C%dF%d\t" % (i+1,j+1))
+f.write("\n")
 for i, c in enumerate(card_list):
-     f.write("%s\t" % i)
+     f.write("%s\t" % (i+1))
      for n in c:
          f.write("%s\t" % n)
      f.write("\n")
