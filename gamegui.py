@@ -215,4 +215,3 @@ class Menu(Window):
     
     def erase(self):
         self.game.restoreRect(self.rect)
-            

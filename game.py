@@ -116,18 +116,22 @@ class Game:
         self.game_objects.append(game_object)
         
     def addEventListener(self, game_object):
-        self.event_listeners.append(game_object)
-        self.sortPriority()
+        if game_object not in self.event_listeners:
+            self.event_listeners.append(game_object)
+            self.sortPriority()
         
     def removeEventListener(self, game_object):
-        self.event_listeners.remove(game_object)
+        if game_object in self.event_listeners:
+            self.event_listeners.remove(game_object)
         
     def addPainter(self, game_object):
-        self.paint_list.append(game_object)
-        self.sortDepth()
+        if game_object not in self.paint_list:
+            self.paint_list.append(game_object)
+            self.sortDepth()
 
     def removePainter(self, game_object):
-        self.paint_list.remove(game_object)
+        if game_object in self.paint_list:
+            self.paint_list.remove(game_object)
 
     def removeObject(self, game_object):
         self.game_objects.remove(game_object)
@@ -157,7 +161,7 @@ class Game:
             for gobj in self.game_objects:
                 gobj.update()
 
-            #TODO: Post events to all game_objects
+            #Post events to all game_objects
             for event in pygame.event.get():
                 if event.type == QUIT: sys.exit()
                 for gobj in self.event_listeners:
@@ -166,7 +170,7 @@ class Game:
             for gobj in self.paint_list:
                 gobj.erase()
                 
-            #TODO: Previous one will just mark rectangles for erasing. Now
+            #Previous one will just mark rectangles for erasing. Now
             #do the real erasing, copying from the background
             self.screen.blit(self.background,(0,0))
             
