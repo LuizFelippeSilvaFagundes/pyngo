@@ -21,7 +21,7 @@ def configDefaults():
 
 def loadCards():
     global cards
-    cards = []
+    cards = {}
     try:
         f = open("cards.csv", "rb")
         #Skip headers
@@ -33,12 +33,12 @@ def loadCards():
             line1, line2, line3 = [], [], []
             for i in range(9):
                 if nums[1 + i*3] != '*':
-                    line1.append(nums[1 + i*3])
+                    line1.append(int(nums[1 + i*3]))
                 if nums[2 + i*3] != '*':
-                    line2.append(nums[2 + i*3])
+                    line2.append(int(nums[2 + i*3]))
                 if nums[3 + i*3] != '*':
-                    line3.append(nums[3 + i*3])
-            cards.append((card_num, line1, line2, line3))
+                    line3.append(int(nums[3 + i*3]))
+            cards[int(card_num)] = (line1, line2, line3)
         f.close()
     except:
         print "Error loading cards.csv"
@@ -134,6 +134,8 @@ def toggleFullScreen(ev):
 
 def escapeKey(ev):
     if game.getState() == STATE_PLAYING:
+        sound = loadSound('pause.ogg')
+        sound.play()
         game.setState(STATE_PAUSED)
         PauseMenu(game)
     elif game.getState() == STATE_CHECKING:
@@ -239,11 +241,10 @@ class PauseMenu(Menu):
         return True
 
 
-class CheckCardMenu(Menu):
+class CheckCardMenu(CheckCardWindow):
     def __init__(self, game):
-        Menu.__init__(self, game, SCREEN_RES[0] / 2, title="Comprobar Carton")
+        CheckCardWindow.__init__(self, game, SCREEN_RES[0] / 2)
 
-        self.addOption("Volver", self.back)
         self.game.addPainter(self)
         self.game.addEventListener(self)
 
@@ -254,6 +255,25 @@ class CheckCardMenu(Menu):
     def back(self):
         self.game.setState(STATE_PAUSED)
         PauseMenu(game)
+
+    def checkCard(self, cardtext):
+        try:
+            cardnum = int(cardtext)
+            bingo_prize = True
+            line_prize = False
+            for line in cards[cardnum]:
+                curr_line_prize = True
+                for num in line:
+                    if num not in played_balls:
+                        bingo_prize = False
+                        curr_line_prize = False
+                if curr_line_prize: line_prize = True
+
+            if bingo_prize:
+                self.displayBingo()
+            elif line_prize:
+                self.displayLine()
+        except: pass
 
     def stateChanged(self, state):
         self.game.removeObject(self)
@@ -360,10 +380,18 @@ class VoiceMenu(Menu):
             self.addOption("[ Alvaro ]", self.setVoice('alvaro'))
         else:
             self.addOption("Alvaro", self.setVoice('alvaro'))
-        if VOICE_FOLDER == 'default':
-            self.addOption("[ Default ]", self.setVoice('default'))
+        if VOICE_FOLDER == 'jorge':
+            self.addOption("[ Jorge ]", self.setVoice('jorge'))
         else:
-            self.addOption("Default", self.setVoice('default'))
+            self.addOption("Jorge", self.setVoice('jorge'))
+        if VOICE_FOLDER == 'laura':
+            self.addOption("[ Laura ]", self.setVoice('laura'))
+        else:
+            self.addOption("Laura", self.setVoice('laura'))
+        if VOICE_FOLDER == 'raquel':
+            self.addOption("[ Raquel ]", self.setVoice('raquel'))
+        else:
+            self.addOption("Raquel", self.setVoice('raquel'))
         self.addOption("Volver", self.back)
         self.game.addPainter(self)
         self.game.addEventListener(self)
@@ -429,7 +457,6 @@ class Round:
 
     def __init__(self):
         self.pending_balls = range(1, NUM_BALLS + 1)
-        self.seen_balls = []
 
     def pendingBalls(self):
         return self.pending_balls
@@ -439,7 +466,6 @@ class Round:
             return None
         next_ball = random.choice(self.pending_balls)
         self.pending_balls.remove(next_ball)
-        self.seen_balls.append(next_ball)
         return next_ball
 
 
@@ -531,13 +557,14 @@ class BallPainter(GameObject):
 
 class BingoRound(GameObject):
     def __init__(self, game):
+        global played_balls
         GameObject.__init__(self, game)
 
         game.addEventListener(self)
         game.addPainter(self)
 
         self.round = Round()
-        self.played_balls = []
+        played_balls = []
         self.last_ball = None
         self.smallball = loadImage('smallball.png')
         self.smallball.set_colorkey((0, 0, 0))
@@ -553,29 +580,34 @@ class BingoRound(GameObject):
 
         pygame.mouse.set_visible(False)
 
+        for i in range(50):
+            pygame.event.post(pygame.event.Event(EVENT_BALL))
+
         if DELAY_NEXTBALL > 0:
             pygame.time.set_timer(EVENT_BALL, DELAY_NEXTBALL + int(sound_begin.get_length() * 1000))
 
     def paint(self, surface):
-
+        global played_balls
         rect = self.smallball.get_rect()
         bolitas = len(self.round.pendingBalls())
-        played_balls = len(self.played_balls)
         if bolitas > 30: bolitas = 30
         for i in range(bolitas):
             rect.centerx = random.randint(0, 200)
             rect.centery = SCREEN_RES[1] - random.expovariate(9) * 100
             surface.blit(self.smallball, rect)
 
-        self.pendingtext = self.pendingfont.render("BOLAS JUGADAS: " + str(played_balls), 1, PENDING_TEXTCOLOR)
+        self.pendingtext = self.pendingfont.render("BOLAS JUGADAS: " + str(len(played_balls)), 1, PENDING_TEXTCOLOR)
         rect = self.pendingtext.get_rect()
         rect.centery = 550
         rect.centerx = 500
         surface.blit(self.pendingtext, rect)
 
     def processEvent(self, event):
+        global played_balls
         if event.type == MOUSEBUTTONDOWN:
             if self.game.getState() == STATE_PLAYING and DELAY_NEXTBALL:
+                sound = loadSound('pause.ogg')
+                sound.play()
                 game.setState(STATE_PAUSED)
                 PauseMenu(game)
             elif self.game.getState() == STATE_PLAYING:
@@ -583,6 +615,8 @@ class BingoRound(GameObject):
             elif self.game.getState() == STATE_FINISHED:
                 game.setState(STATE_MAINMENU)
         elif self.game.getState() == STATE_PLAYING and event.type == KEYDOWN and event.key == K_SPACE:
+            sound = loadSound('pause.ogg')
+            sound.play()
             game.setState(STATE_PAUSED)
             PauseMenu(game)
         elif event.type == EVENT_BALL:
@@ -598,7 +632,7 @@ class BingoRound(GameObject):
                 return True
 
             self.ball_painters[ball - 1].seen()
-            self.played_balls.append(ball)
+            played_balls.append(ball)
 
             sound = loadSound(str(ball) + '.ogg')
             sound.play()
@@ -653,8 +687,6 @@ class BingoRound(GameObject):
             game.removePainter(self)
             pygame.time.set_timer(EVENT_BALL, 0)
             pygame.time.set_timer(EVENT_LASTBALL, 0)
-            sound = loadSound('pause.ogg')
-            sound.play()
 
 
 configDefaults()
@@ -664,7 +696,6 @@ game = Game(SCREEN_RES, "Bingo AIM", 100, fullscreen=USE_FULLSCREEN)
 
 hotkeys = HotKeyManager(game)
 hotkeys.addAction(K_ESCAPE, escapeKey, True)
-hotkeys.addAction(K_f, toggleFullScreen, True)
 
 back = loadImage('back.jpg')
 

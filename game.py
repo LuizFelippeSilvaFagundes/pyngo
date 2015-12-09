@@ -83,7 +83,7 @@ class Game:
         self.background = self.background.convert()
 
         #Create a clock object, for timing
-        self.clock = pygame.time.Clock()		
+        self.clock = pygame.time.Clock()
         self.fps = fps
         
         self.state = None
@@ -167,8 +167,8 @@ class Game:
                 for gobj in self.event_listeners:
                     if not gobj.processEvent(event): break
 
-            for gobj in self.paint_list:
-                gobj.erase()
+            #for gobj in self.paint_list:
+            #    gobj.erase()
                 
             #Previous one will just mark rectangles for erasing. Now
             #do the real erasing, copying from the background
