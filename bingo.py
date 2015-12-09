@@ -580,9 +580,6 @@ class BingoRound(GameObject):
 
         pygame.mouse.set_visible(False)
 
-        for i in range(50):
-            pygame.event.post(pygame.event.Event(EVENT_BALL))
-
         if DELAY_NEXTBALL > 0:
             pygame.time.set_timer(EVENT_BALL, DELAY_NEXTBALL + int(sound_begin.get_length() * 1000))
 
