@@ -17,7 +17,7 @@ def configDefaults():
     DELAY_NEXTBALL = getConfigInt('game', 'ball_delay', 4000)
     BALL_SHOWTIME = getConfigInt('game', 'ball_showtime', DELAY_NEXTBALL - 1000)
     USE_FULLSCREEN = getConfigBool('display', 'fullscreen', False)
-    VOICE_FOLDER = getConfigString('game', 'voice', 'default')
+    VOICE_FOLDER = getConfigString('game', 'voice', 'jorge')
 
 def loadCards():
     global cards
