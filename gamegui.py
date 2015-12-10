@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 from game import *
 
+FONT_NAME = "freesansbold.ttf"
+
 #Button options
-BUTTON_TEXTSIZE = 32
+BUTTON_TEXTSIZE = 24
 BUTTON_BACKCOLOR = (190,190,190)
 BUTTON_HOVERCOLOR = (220,220,220)
 BUTTON_TEXTCOLOR = (0,0,0)
@@ -13,14 +15,14 @@ BUTTON_OPACITY = 160
 MENU_BACKCOLOR = (200,200,200)
 MENU_OPACITY = 50
 MENU_MARGIN = 10
-MENU_TITLESIZE = 48
+MENU_TITLESIZE = 32
 MENU_TITLECOLOR = (220,220,220)
 
 CHECK_BACKCOLOR = (0,0,0)
 CHECK_OPACITY = 180
 PRIZE_MARGIN = 120
 
-TEXTBOX_TEXTSIZE = 32
+TEXTBOX_TEXTSIZE = 24
 TEXTBOX_BACKCOLOR = (60,60,60)
 TEXTBOX_HOVERCOLOR = (80,80,80)
 TEXTBOX_TEXTCOLOR = (255,255,255)
@@ -29,7 +31,7 @@ TEXTBOX_OPACITY = 180
 
 CURSOR_FLASH_TICKS = 250
 
-PRIZE_TEXTSIZE = 100
+PRIZE_TEXTSIZE = 64
 PRIZE_TEXTCOLOR = (150 , 255, 100)
 
 
@@ -134,7 +136,7 @@ class TextButton(GameObject, GUIComponent):
         self.action = action
         
         #Create font and text surface
-        font = pygame.font.Font(None,BUTTON_TEXTSIZE)
+        font = pygame.font.Font(FONT_NAME,BUTTON_TEXTSIZE)
         text = font.render(text,1,BUTTON_TEXTCOLOR)
 
         #Set width and height for the button, if specified, or use
@@ -187,7 +189,7 @@ class TextBox(GameObject, GUIComponent):
         #text surface if not specified
         self.rect.w = width
 
-        self.font = pygame.font.Font(None,TEXTBOX_TEXTSIZE)
+        self.font = pygame.font.Font(FONT_NAME,TEXTBOX_TEXTSIZE)
         text_surface = self.font.render("XXX",1,TEXTBOX_TEXTCOLOR)
         if self.height !=0: self.rect.h = self.height
         else : self.rect.h = text_surface.get_rect().h + 2*TEXTBOX_MARGIN
@@ -264,7 +266,7 @@ class Menu(Window):
         self.setSize(width,MENU_MARGIN)
 
         if self.title_text:
-            font = pygame.font.Font(None,MENU_TITLESIZE)
+            font = pygame.font.Font(FONT_NAME,MENU_TITLESIZE)
             self.title_surf = font.render(self.title_text,1,MENU_TITLECOLOR)
             r = self.getRect()
             r.h = r.h + self.title_surf.get_rect().h + MENU_MARGIN
@@ -325,7 +327,7 @@ class CheckCardWindow(Window):
 
         self.setSize(width,MENU_MARGIN)
 
-        font = pygame.font.Font(None,MENU_TITLESIZE)
+        font = pygame.font.Font(FONT_NAME,MENU_TITLESIZE)
         self.title_surf = font.render(self.title_text,1,MENU_TITLECOLOR)
         r = self.getRect()
 
@@ -347,7 +349,7 @@ class CheckCardWindow(Window):
         self.card_number.setPosition(self.rect.left + MENU_MARGIN, ypos)
         ypos += self.card_number.rect.h + MENU_MARGIN
 
-        font = pygame.font.Font(None,PRIZE_TEXTSIZE)
+        font = pygame.font.Font(FONT_NAME,PRIZE_TEXTSIZE)
         self.bingo_surf = font.render("BINGO!!!!!",1,PRIZE_TEXTCOLOR)
         self.line_surf = font.render("LINEA!",1,PRIZE_TEXTCOLOR)
 

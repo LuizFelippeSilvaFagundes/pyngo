@@ -50,14 +50,14 @@ NUM_BALLS = 90
 
 SCREEN_RES = (800, 600)
 
-BALL_TEXTSIZE = 200
+BALL_TEXTSIZE = 128
 BALL_TEXTCOLOR = (1, 1, 1)
 BALL_SMALLSIZE = (45, 45)
 BALL_BIGSIZE = (200, 200)
 BALL_MARGIN = 10
 BALL_STEPS = 15
 
-PENDING_TEXTSIZE = 50
+PENDING_TEXTSIZE = 32
 PENDING_TEXTCOLOR = (200, 200, 200)
 
 STATE_MAINMENU, STATE_PLAYING, STATE_PAUSED, STATE_FINISHED, STATE_OPTIONS, STATE_CHECKING = range(6)
@@ -485,8 +485,8 @@ class BallPainter(GameObject):
         self.state = BallPainter.UNSEEN
         self.surface_big = BallPainter.ball_surface.copy()
 
-        # Create font and text surface
-        font = pygame.font.Font(None, BALL_TEXTSIZE)
+        # Create fontfont and text surface
+        font = pygame.font.Font(FONT_NAME, BALL_TEXTSIZE)
         text = font.render(str(ballnum), 1, BALL_TEXTCOLOR)
 
         self.rect = self.surface_big.get_rect()
@@ -569,7 +569,7 @@ class BingoRound(GameObject):
         self.smallball = loadImage('smallball.png')
         self.smallball.set_colorkey((0, 0, 0))
 
-        self.pendingfont = pygame.font.Font(None, PENDING_TEXTSIZE)
+        self.pendingfont = pygame.font.Font(FONT_NAME, PENDING_TEXTSIZE)
 
         self.ball_painters = []
         for i in range(1, NUM_BALLS + 1):
