@@ -10,7 +10,10 @@ import os
 #NOTES: Copy cards.csv to dist/
 
 
-setup(windows=['bingo.py'],
+setup(windows=[{
+    "script": 'bingo.py',
+    "icon_resources": [(0, "bingo.ico")] 
+    }],
       options={
           "py2exe": {
               "excludes": ["OpenGL.GL", "Numeric", "copyreg", "itertools.imap", "numpy", "pkg_resources", "queue", "winreg", "pygame.SRCALPHA", "pygame.sdlmain_osx"],

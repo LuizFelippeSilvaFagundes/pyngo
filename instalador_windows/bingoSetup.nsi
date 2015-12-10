@@ -95,7 +95,7 @@ Section "BingoAIM" SecBingoAIM
 	;Create shortcuts
 	CreateDirectory "$SMPROGRAMS\$StartMenuFolder"
 	CreateShortCut "$SMPROGRAMS\$StartMenuFolder\Uninstall.lnk" "$INSTDIR\Uninstall.exe"
-	CreateShortCut "$SMPROGRAMS\$StartMenuFolder\bingoaim.lnk" "$INSTDIR\bingo.exe"
+	CreateShortCut "$SMPROGRAMS\$StartMenuFolder\Bingo AIM.lnk" "$INSTDIR\bingo.exe"
 
 	!insertmacro MUI_STARTMENU_WRITE_END
 	
