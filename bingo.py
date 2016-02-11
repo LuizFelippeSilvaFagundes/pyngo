@@ -497,7 +497,7 @@ class BallPainter(GameObject):
         self.surface = pygame.transform.scale(self.surface_big, BALL_SMALLSIZE)
         self.rect = self.surface.get_rect()
         self.rect.centerx, self.rect.centery = self.ballPosition(ballnum)
-        self.surface.set_alpha(15)
+        self.surface.set_alpha(UNSEEN_BALL_ALPHA)
 
     def ballPosition(self, ball):
         x = SCREEN_RES[0] - ((9 - (ball - 1)) % 10) * (BALL_SMALLSIZE[0] + BALL_MARGIN) - BALL_SMALLSIZE[
