@@ -20,6 +20,11 @@ def configDefaults():
     VOICE_FOLDER = getConfigString('game', 'voice', 'jorge')
 
 def loadCards():
+    if not loadCards1():
+        if not loadCards2():
+            print "Error loading cards.csv"
+
+def loadCards1():
     global cards
     cards = {}
     try:
@@ -40,9 +45,30 @@ def loadCards():
                     line3.append(int(nums[3 + i*3]))
             cards[int(card_num)] = (line1, line2, line3)
         f.close()
+        return True
     except:
-        print "Error loading cards.csv"
-        return
+        return False
+
+def loadCards2():
+    global cards
+    cards = {}
+    try:
+        f = open("cards.csv", "rb")
+        #Skip headers
+        next(f)
+        #Read data
+        for line in f:
+            nums = line.split(',')
+            card_num = nums[0]
+            line1 = [int(x) for x in nums[1:6]]
+            line2 = [int(x) for x in nums[6:11]]
+            line3 = [int(x) for x in nums[11:]]
+            cards[int(card_num)] = (line1, line2, line3)
+        f.close()
+        print cards
+        return True
+    except:
+        return False
 
 EVENT_BALL = USEREVENT
 EVENT_LASTBALL = USEREVENT + 1
